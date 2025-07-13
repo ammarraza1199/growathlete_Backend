@@ -12,12 +12,24 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middlewares
+const allowedOrigins = [
+  'https://www.growathlete.com',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: [process.env.CLIENT_URL || 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -43,5 +55,9 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-}); 
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`🚀 Server running on Render (port ${PORT})`);
+  } else {
+    console.log(`🚀 Server running locally at http://localhost:${PORT}`);
+  }
+});
