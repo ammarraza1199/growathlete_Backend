@@ -238,21 +238,11 @@ const unfollowProfile = async (req, res) => {
 // @access  Private
 const getAllProfilesExceptCurrentUser = async (req, res) => {
   try {
-    const currentUserId = req.user._id;
-    const profiles = await Profile.find({ user: { $ne: currentUserId } }).populate('user', 'fullName profilePicture');
-
-    const currentUser = await User.findById(currentUserId).select('following');
-    const followingIds = currentUser ? currentUser.following.map(id => id.toString()) : [];
-
-    const profilesWithFollowStatus = profiles.map(profile => {
-      const isFollowing = followingIds.includes(profile.user._id.toString());
-      return { ...profile.toObject(), isFollowing };
-    });
-
-    res.status(200).json(profilesWithFollowStatus);
+    // Exclude current user
+    const profiles = await Profile.find({ user: { $ne: req.user._id } }).populate('user');
+    res.json(profiles);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send('Server Error');
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
