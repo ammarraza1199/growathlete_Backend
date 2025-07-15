@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 5001;
 // Middlewares
 const allowedOrigins = [
   'https://www.growathlete.com',
+  'https://growathlete.in',
   'http://localhost:3000'
 ];
 
